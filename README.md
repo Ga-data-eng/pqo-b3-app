@@ -46,6 +46,33 @@ npm run dev:server   # http://localhost:4000
 npm run dev:web        # http://localhost:5173 (proxy /api -> 4000)
 ```
 
+## Deploy (produção)
+
+Um único serviço: o Express serve a API **e** o build estático do frontend
+(`web/dist`) no mesmo domínio — sem CORS, sem cookie cross-site, sem variável
+apontando pra outra URL. Funciona em qualquer host que rode um processo Node
+de vida longa com uma porta HTTP (Render, Railway, Fly.io etc. — **não** dá
+pra usar assim no Vercel, que roda tudo como função serverless sem disco
+gravável para o SQLite).
+
+Passo a passo no **Render** (tem plano gratuito):
+
+1. Suba o código num repositório Git (GitHub/GitLab).
+2. No Render: **New +** → **Web Service** → conecte o repositório.
+3. Configure:
+   - **Root Directory**: (deixe em branco — raiz do repositório)
+   - **Build Command**: `npm run install:all && npm run build`
+   - **Start Command**: `npm start`
+4. Variáveis de ambiente (**Environment**):
+   - `DATABASE_URL` — connection string do Postgres (Neon/Supabase)
+   - `SESSION_SECRET` — string aleatória longa
+   - `NODE_ENV` = `production`
+5. Deploy. `npm run build` compila o React (`web/dist`) e repopula o SQLite
+   de conteúdo; `npm start` sobe o Express, que já serve os dois.
+
+Não precisa configurar `WEB_ORIGIN` nem nada de frontend separado — a app
+inteira fica em uma única URL (ex.: `https://pqo-b3-app.onrender.com`).
+
 ## Login e progresso do usuário
 
 - Cadastro/login é feito por e-mail + senha (`POST /api/auth/register`,
