@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 
 export default function StudyBySubject() {
-  const [structure, setStructure] = useState([])
+  const [structure, setStructure] = useState(null)
   const [openTitle, setOpenTitle] = useState(null)
   const [topicsByChapter, setTopicsByChapter] = useState({})
   const navigate = useNavigate()
@@ -11,6 +11,8 @@ export default function StudyBySubject() {
   useEffect(() => {
     api.get('/meta/structure').then(setStructure)
   }, [])
+
+  if (!structure) return <div className="card">Carregando matérias…</div>
 
   async function toggleChapterTopics(chapterId) {
     if (topicsByChapter[chapterId]) {

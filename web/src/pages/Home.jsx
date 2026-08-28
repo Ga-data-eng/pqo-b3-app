@@ -22,17 +22,50 @@ export default function Home({ user }) {
   const [summary, setSummary] = useState(null)
   const [mission, setMission] = useState(null)
   const [weakChapter, setWeakChapter] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
 
   useEffect(() => {
-    api.get('/dashboard/summary').then((s) => {
-      setSummary(s)
-      const withData = s.chapter_performance.filter((c) => c.total_answered > 0)
-      if (withData.length > 0) {
-        setWeakChapter(withData.sort((a, b) => a.percent - b.percent)[0])
-      }
-    })
-    api.get('/missions/today').then(setMission)
+    let cancelled = false
+
+    Promise.all([
+      api.get('/dashboard/summary').then((s) => {
+        if (cancelled) return
+        setSummary(s)
+        const withData = s.chapter_performance.filter((c) => c.total_answered > 0)
+        if (withData.length > 0) {
+          setWeakChapter(withData.sort((a, b) => a.percent - b.percent)[0])
+        }
+      }),
+      api.get('/missions/today').then((m) => { if (!cancelled) setMission(m) }),
+    ])
+      .catch(() => { if (!cancelled) setLoadError(true) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+
+    return () => { cancelled = true }
   }, [])
+
+  if (loading) {
+    return (
+      <div className="card" style={{ textAlign: 'center', padding: 40 }}>
+        <p className="muted">Carregando seus dados…</p>
+        <p className="small muted" style={{ marginTop: 6 }}>
+          Pode levar até um minuto na primeira vez (o servidor "acorda" após período de inatividade).
+        </p>
+      </div>
+    )
+  }
+
+  if (loadError) {
+    return (
+      <div className="card" style={{ textAlign: 'center', padding: 40 }}>
+        <p className="muted">Não foi possível carregar seus dados agora.</p>
+        <button className="btn btn-primary" style={{ marginTop: 12 }} onClick={() => window.location.reload()}>
+          Tentar novamente
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div>
