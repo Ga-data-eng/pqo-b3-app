@@ -1,7 +1,7 @@
 // Em dev, '/api' é reescrito pelo proxy do Vite para http://localhost:4000.
-// Em produção (Vercel), não há proxy — VITE_API_URL deve apontar para a URL
-// completa do backend (ex.: https://pqo-b3-backend.onrender.com/api).
-const BASE = import.meta.env.VITE_API_URL || '/api';
+// Em produção, o próprio backend serve o build do frontend no mesmo domínio,
+// então '/api' também funciona sem qualquer configuração extra.
+const BASE = '/api';
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {

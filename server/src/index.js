@@ -45,6 +45,11 @@ async function start() {
   // que express-session detecte corretamente HTTPS e emita o cookie "secure".
   if (isProduction) app.set('trust proxy', 1);
 
+  // Em dev, o frontend roda em outra porta (Vite, :5173) e usa o proxy do
+  // Vite para /api — ainda assim configuramos CORS para permitir chamadas
+  // diretas nesse cenário. Em produção, o próprio Express serve o frontend
+  // (build estático), então tudo fica no mesmo domínio e o CORS nem entra
+  // em jogo — cookie 'lax' funciona normalmente (same-site).
   app.use(cors({ origin: process.env.WEB_ORIGIN || 'http://localhost:5173', credentials: true }));
   app.use(express.json());
   app.use(
@@ -56,11 +61,7 @@ async function start() {
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        // Em produção, frontend (Vercel) e backend (Render) ficam em domínios
-        // diferentes — o cookie de sessão só é enviado em requisições
-        // cross-site se sameSite=none + secure=true. Em dev, same-origin via
-        // proxy do Vite, então 'lax' basta.
-        sameSite: isProduction ? 'none' : 'lax',
+        sameSite: 'lax',
         secure: isProduction,
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
       },
@@ -83,6 +84,20 @@ async function start() {
   app.use('/api/missions', missions);
 
   app.get('/api/health', (req, res) => res.json({ ok: true }));
+
+  // Serve o build do frontend (web/dist) a partir do próprio backend, para
+  // que tudo rode em um único serviço/domínio (sem CORS, sem cookie
+  // cross-site). O build precisa existir antes de iniciar o servidor — veja
+  // o Build Command do deploy (roda "npm run build" na raiz do repositório).
+  const webDistPath = path.join(__dirname, '..', '..', 'web', 'dist');
+  if (fs.existsSync(webDistPath)) {
+    app.use(express.static(webDistPath));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(webDistPath, 'index.html'));
+    });
+  } else {
+    console.log('web/dist não encontrado — frontend não será servido por este processo (rode "npm run build" na raiz, ou use "npm run dev" para desenvolvimento).');
+  }
 
   // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {

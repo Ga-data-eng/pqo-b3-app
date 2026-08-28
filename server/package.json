@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "node src/index.js",
     "start": "node src/index.js",
-    "seed": "node src/seed/run.js"
+    "seed": "node src/seed/clean.js && node src/seed/run.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
