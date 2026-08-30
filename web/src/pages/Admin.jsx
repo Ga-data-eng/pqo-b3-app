@@ -2,26 +2,40 @@ import { useEffect, useState } from 'react'
 import { api } from '../lib/api'
 
 const STATUS_OPTIONS = ['rascunho', 'em_revisao', 'aprovada', 'arquivada']
+const PAGE_SIZE = 25
 
 export default function Admin() {
   const [stats, setStats] = useState(null)
   const [questions, setQuestions] = useState([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(0)
+  const [search, setSearch] = useState('')
   const [filters, setFilters] = useState({ status: '', difficulty: '', missing_source: '' })
   const [duplicates, setDuplicates] = useState([])
+  const [loading, setLoading] = useState(true)
 
   function load() {
+    setLoading(true)
     const params = new URLSearchParams(Object.entries(filters).filter(([, v]) => v))
-    api.get(`/admin/questions?${params.toString()}`).then(setQuestions)
+    if (search) params.set('q', search)
+    params.set('limit', PAGE_SIZE)
+    params.set('offset', page * PAGE_SIZE)
+    api.get(`/admin/questions?${params.toString()}`).then((r) => {
+      setQuestions(r.items)
+      setTotal(r.total)
+      setLoading(false)
+    })
   }
 
   useEffect(() => {
     api.get('/admin/stats').then(setStats)
     api.get('/admin/questions/duplicates').then(setDuplicates)
-    load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  useEffect(load, [filters])
+  useEffect(load, [filters, search, page])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { setPage(0) }, [filters, search])
 
   async function updateStatus(id, status) {
     await api.put(`/admin/questions/${id}`, { status })
@@ -33,6 +47,8 @@ export default function Admin() {
     await api.delete(`/admin/questions/${id}`)
     load()
   }
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   return (
     <div>
@@ -66,7 +82,14 @@ export default function Admin() {
 
       <div className="card">
         <h2>Filtros</h2>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <input
+            type="text"
+            placeholder="Buscar no enunciado…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ padding: '8px 12px', borderRadius: 10, border: '1px solid var(--border)', minWidth: 220 }}
+          />
           <select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
             <option value="">Todos os status</option>
             {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -88,19 +111,32 @@ export default function Admin() {
         </div>
       </div>
 
-      {questions.map((q) => (
-        <div key={q.id} className="card">
-          <div className="top-bar">
-            <span className="small muted">#{q.id} · {q.difficulty} · {q.source_chapter}</span>
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 18px' }}>
+          <h2 style={{ margin: 0 }}>Questões {loading ? '…' : `(${total})`}</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button className="btn btn-ghost" disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>← Anterior</button>
+            <span className="small muted">Página {page + 1} de {totalPages}</span>
+            <button className="btn btn-ghost" disabled={page >= totalPages - 1} onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}>Próxima →</button>
+          </div>
+        </div>
+
+        {questions.map((q) => (
+          <div key={q.id} className="admin-row">
+            <span className={`badge badge-${q.difficulty}`}>{q.difficulty}</span>
+            <span className="admin-row-statement" title={q.statement}>#{q.id} · {q.statement}</span>
+            <span className="small muted admin-row-source">p. {q.source_page || '—'}</span>
             <select value={q.status} onChange={(e) => updateStatus(q.id, e.target.value)}>
               {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
+            <button className="btn btn-ghost" onClick={() => remove(q.id)}>Excluir</button>
           </div>
-          <p style={{ fontWeight: 600 }}>{q.statement}</p>
-          <p className="small muted">Fonte: p. {q.source_page || '—'}</p>
-          <button className="btn btn-ghost" onClick={() => remove(q.id)}>Excluir</button>
-        </div>
-      ))}
+        ))}
+
+        {!loading && questions.length === 0 && (
+          <p className="muted small" style={{ padding: 18 }}>Nenhuma questão encontrada com esses filtros.</p>
+        )}
+      </div>
     </div>
   )
 }

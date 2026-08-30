@@ -5,6 +5,8 @@ export const router = Router();
 
 router.get('/questions', (req, res) => {
   const { chapter_id, difficulty, status, missing_source, q } = req.query;
+  const limit = Math.min(Number(req.query.limit) || 25, 100);
+  const offset = Math.max(Number(req.query.offset) || 0, 0);
   const clauses = [];
   const params = [];
   if (chapter_id) {
@@ -27,8 +29,11 @@ router.get('/questions', (req, res) => {
     params.push(`%${q}%`);
   }
   const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
-  const rows = db.prepare(`SELECT * FROM questions ${where} ORDER BY id DESC LIMIT 500`).all(...params);
-  res.json(rows);
+  const total = db.prepare(`SELECT COUNT(*) n FROM questions ${where}`).get(...params).n;
+  const items = db
+    .prepare(`SELECT * FROM questions ${where} ORDER BY id DESC LIMIT ? OFFSET ?`)
+    .all(...params, limit, offset);
+  res.json({ items, total, limit, offset });
 });
 
 router.get('/questions/duplicates', (req, res) => {
