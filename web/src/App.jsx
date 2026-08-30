@@ -69,7 +69,10 @@ export default function App() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="sidebar-logo">📈 PQO B3</div>
+        <div className="sidebar-logo">
+          <span className="mark">[B<sup>3</sup>]</span>
+          <span className="wordmark">PQO Prep</span>
+        </div>
         {NAV.map((item) => (
           <NavLink
             key={item.to}

@@ -14,7 +14,7 @@ export default function Onboarding({ onDone }) {
   return (
     <div style={{ maxWidth: 560, margin: '0 auto', padding: '48px 20px' }}>
       <div style={{ textAlign: 'center', marginBottom: 28 }}>
-        <div style={{ fontSize: 42 }}>📈</div>
+        <span className="mark-lg" style={{ marginBottom: 14, display: 'inline-flex' }}>[B<sup>3</sup>]</span>
         <h1>Bem-vindo(a) à preparação PQO B3</h1>
         <p className="muted">Vamos personalizar seus estudos com base no Guia Por Dentro da B3.</p>
       </div>

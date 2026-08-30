@@ -46,11 +46,11 @@ export default function Dashboard() {
         {weekly.length === 0 ? <p className="muted small">Sem dados suficientes ainda.</p> : (
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={weekly}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e4e8f1" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e7e2f1" />
               <XAxis dataKey="day" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
-              <Line type="monotone" dataKey="accuracy" stroke="#2f5dff" strokeWidth={3} name="Taxa de acerto (%)" />
+              <Line type="monotone" dataKey="accuracy" stroke="#5b2a86" strokeWidth={3} name="Taxa de acerto (%)" />
             </LineChart>
           </ResponsiveContainer>
         )}

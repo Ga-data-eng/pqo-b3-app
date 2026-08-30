@@ -37,7 +37,7 @@ export default function Login({ onAuthenticated }) {
   return (
     <div style={{ maxWidth: 440, margin: '0 auto', padding: '48px 20px' }}>
       <div style={{ textAlign: 'center', marginBottom: 28 }}>
-        <div style={{ fontSize: 42 }}>📈</div>
+        <span className="mark-lg" style={{ marginBottom: 14, display: 'inline-flex' }}>[B<sup>3</sup>]</span>
         <h1>Preparação PQO B3</h1>
         <p className="muted">
           {mode === 'login' ? 'Entre para continuar seus estudos.' : 'Crie sua conta para começar a estudar.'}
