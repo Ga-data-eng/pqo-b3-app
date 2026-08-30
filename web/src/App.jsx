@@ -95,6 +95,13 @@ export default function App() {
         </button>
       </aside>
 
+      <div className="mobile-topbar">
+        <span className="mark">[B<sup>3</sup>]</span>
+        <button onClick={handleLogout} className="logout-btn">
+          🚪 Sair
+        </button>
+      </div>
+
       <main className="main-content">
         <Routes>
           <Route path="/" element={<Home user={user} onUserChange={setUser} />} />
