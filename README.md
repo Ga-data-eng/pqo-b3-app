@@ -1,7 +1,34 @@
 # PQO B3 — Plataforma de Estudos
 
-Aplicação de preparação gamificada para a certificação PQO (B3), construída a
-partir do conteúdo do *Guia Por Dentro da B3*.
+Aplicação full-stack de preparação gamificada para a certificação PQO (B3),
+construída a partir do conteúdo do *Guia Por Dentro da B3*: 435 questões e
+243 flashcards autorados e validados capítulo a capítulo, com explicações
+completas, citação de fonte, modos de estudo adaptativos e simulado
+cronometrado nos moldes da prova real.
+
+**🔗 Demo ao vivo:** https://pqo-b3-app.onrender.com
+*(plano gratuito — a primeira requisição após período de inatividade pode levar até ~50s para o servidor "acordar")*
+
+**Stack:** React 18 + Vite · Node.js/Express · PostgreSQL · SQLite · sessão
+autenticada por cookie · deploy em serviço único no Render.
+
+## Funcionalidades
+
+- **Autenticação real** — cadastro/login por e-mail e senha, sessão via
+  cookie HTTP-only, progresso persistido por usuário.
+- **Modos de estudo** — treino rápido, estudo por matéria, modo adaptativo
+  (prioriza tópicos com pior desempenho), caderno de erros com repetição
+  espaçada, modo desafio e cronometrado.
+- **Simulado PQO** — questões e alternativas embaralhadas, cronômetro,
+  navegação livre, marcação para revisão, resultado apenas ao final.
+- **Flashcards** — revisão com avaliação de dificuldade (repetição
+  espaçada), navegação anterior/próximo e visão geral paginada com busca.
+- **Dashboard e gamificação** — XP, níveis, streak, conquistas, missões
+  diárias, mapa de conhecimento por capítulo, gráficos de evolução.
+- **Busca full-text** no texto integral do guia (715 páginas) e um
+  "Professor PQO" com respostas curadas sobre pegadinhas clássicas de prova.
+- **Painel administrativo** — gestão do banco de questões com paginação,
+  busca e filtros por status/dificuldade.
 
 ## Estrutura
 
